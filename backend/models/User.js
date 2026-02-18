@@ -1,0 +1,51 @@
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  progress: [{
+    contentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Content'
+    },
+    completed: {
+      type: Boolean,
+      default: false
+    },
+    completedAt: Date,
+    quizScores: [{
+      quizId: String,
+      score: Number,
+      date: Date
+    }]
+  }],
+  bookmarks: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Content'
+  }],
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+module.exports = mongoose.model('User', userSchema);
