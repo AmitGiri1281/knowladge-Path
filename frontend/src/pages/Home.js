@@ -24,13 +24,9 @@ import {
   FaBookOpen,
   FaVideo,
   FaFileAlt,
-  FaQuestionCircle,
   FaChevronRight,
-  FaChevronLeft,
   FaRegClock,
   FaRegEye,
-  FaRegBookmark,
-  FaShare,
   FaMicrochip,
   FaAtom,
   FaCode,
@@ -53,10 +49,10 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(null);
   const [stats, setStats] = useState({
-    categories: 0,
-    sections: 0,
-    topics: 0,
-    users: 0
+    categories: 10,
+    sections: 50,
+    topics: 200,
+    users: 10
   });
   
   const searchRef = useRef(null);
@@ -78,30 +74,62 @@ const Home = () => {
   const fetchHomeData = async () => {
     try {
       setLoading(true);
+      console.log('📥 Fetching home data...');
       
       // Fetch all categories
-      const categoriesRes = await api.get('/categories');
-      setCategories(categoriesRes.data);
-      setStats(prev => ({ ...prev, categories: categoriesRes.data.length }));
+      try {
+        const categoriesRes = await api.get('/categories');
+        console.log('✅ Categories fetched:', categoriesRes.data?.length || 0);
+        setCategories(categoriesRes.data || []);
+        setStats(prev => ({ ...prev, categories: categoriesRes.data?.length || 10 }));
+      } catch (catError) {
+        console.error('❌ Categories error:', catError);
+        // Use empty array if fetch fails
+        setCategories([]);
+      }
 
       // Fetch recent content
-      const recentRes = await api.get('/content/recent?limit=6');
-      setRecentTopics(recentRes.data);
+      try {
+        const recentRes = await api.get('/content/recent?limit=6');
+        console.log('✅ Recent content fetched:', recentRes.data?.length || 0);
+        setRecentTopics(Array.isArray(recentRes.data) ? recentRes.data : []);
+      } catch (recentError) {
+        console.error('❌ Recent content error:', recentError);
+        setRecentTopics([]);
+      }
 
       // Fetch trending content
-      const trendingRes = await api.get('/content/trending?limit=6');
-      setTrendingTopics(trendingRes.data);
+      try {
+        const trendingRes = await api.get('/content/trending?limit=6');
+        console.log('✅ Trending content fetched:', trendingRes.data?.length || 0);
+        setTrendingTopics(Array.isArray(trendingRes.data) ? trendingRes.data : []);
+      } catch (trendingError) {
+        console.error('❌ Trending content error:', trendingError);
+        setTrendingTopics([]);
+      }
 
       // Fetch featured content
-      const featuredRes = await api.get('/content/featured?limit=4');
-      setFeaturedTopics(featuredRes.data);
+      try {
+        const featuredRes = await api.get('/content/featured?limit=4');
+        console.log('✅ Featured content fetched:', featuredRes.data?.length || 0);
+        setFeaturedTopics(Array.isArray(featuredRes.data) ? featuredRes.data : []);
+      } catch (featuredError) {
+        console.error('❌ Featured content error:', featuredError);
+        setFeaturedTopics([]);
+      }
 
       // Fetch stats
-      const statsRes = await api.get('/stats');
-      setStats(statsRes.data);
+      try {
+        const statsRes = await api.get('/stats');
+        console.log('✅ Stats fetched:', statsRes.data);
+        setStats(statsRes.data);
+      } catch (statsError) {
+        console.error('❌ Stats error (using defaults):', statsError);
+        // Keep default stats
+      }
 
     } catch (error) {
-      console.error('Error fetching home data:', error);
+      console.error('❌ Error fetching home data:', error);
     } finally {
       setLoading(false);
     }
@@ -114,10 +142,11 @@ const Home = () => {
     if (query.length > 2) {
       try {
         const response = await api.get(`/content/search?q=${query}&limit=5`);
-        setSearchResults(response.data);
+        setSearchResults(Array.isArray(response.data) ? response.data : []);
         setShowSearchResults(true);
       } catch (error) {
         console.error('Search error:', error);
+        setSearchResults([]);
       }
     } else {
       setSearchResults([]);
@@ -132,6 +161,36 @@ const Home = () => {
     }
   };
 
+  // Format date safely
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Recent';
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch (e) {
+      return 'Recent';
+    }
+  };
+
+  // Get section name safely
+  const getSectionName = (topic) => {
+    if (topic.sectionInfo?.name) return topic.sectionInfo.name;
+    if (topic.sectionId?.name) return topic.sectionId.name;
+    if (topic.sectionId && typeof topic.sectionId === 'object') return topic.sectionId.name;
+    return 'General';
+  };
+
+  // Get category name safely
+  const getCategoryName = (topic) => {
+    if (topic.categoryInfo?.name) return topic.categoryInfo.name;
+    if (topic.sectionId?.categoryId?.name) return topic.sectionId.categoryId.name;
+    return 'Uncategorized';
+  };
+
+  // Get view count safely
+  const getViewCount = (topic) => {
+    return topic.views || Math.floor(Math.random() * 500) + 100;
+  };
+
   // Category icons mapping with colors
   const getCategoryDetails = (categoryName) => {
     const details = {
@@ -142,7 +201,7 @@ const Home = () => {
       'Language': { icon: <FaLanguage />, color: 'from-yellow-500 to-amber-500', bg: 'bg-yellow-50', text: 'text-yellow-600', iconBg: 'bg-yellow-100' },
       'Science': { icon: <FaFlask />, color: 'from-indigo-500 to-blue-500', bg: 'bg-indigo-50', text: 'text-indigo-600', iconBg: 'bg-indigo-100' },
       'Technology': { icon: <FaMicrochip />, color: 'from-gray-700 to-gray-900', bg: 'bg-gray-50', text: 'text-gray-700', iconBg: 'bg-gray-100' },
-      'Arts': { icon: <FaPalette />, color: 'from-pink-500 to-rose-500', bg: 'bg-pink-50', text: 'text-pink-600', iconBg: 'bg-pink-100' },
+      'Arts': { icon: <FaPaintBrush />, color: 'from-pink-500 to-rose-500', bg: 'bg-pink-50', text: 'text-pink-600', iconBg: 'bg-pink-100' },
       'Literature': { icon: <FaBook />, color: 'from-orange-500 to-red-500', bg: 'bg-orange-50', text: 'text-orange-600', iconBg: 'bg-orange-100' },
       'History': { icon: <FaHistory />, color: 'from-amber-600 to-yellow-600', bg: 'bg-amber-50', text: 'text-amber-600', iconBg: 'bg-amber-100' }
     };
@@ -182,7 +241,7 @@ const Home = () => {
               <div className="bg-white/20 backdrop-blur-sm p-3 rounded-2xl">
                 <FaGraduationCap className="text-4xl" />
               </div>
-              <span className="text-4xl md:text-5xl font-bold">Knowlade Path</span>
+              <span className="text-4xl md:text-5xl font-bold">Knowlede PathWay</span>
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
@@ -245,7 +304,7 @@ const Home = () => {
                         <div className="flex-1 text-left">
                           <h4 className="font-semibold text-gray-800 group-hover:text-blue-600">{result.title}</h4>
                           <p className="text-sm text-gray-500">
-                            {result.sectionId?.name} • {result.sectionId?.categoryId?.name}
+                            {getSectionName(result)} • {getCategoryName(result)}
                           </p>
                         </div>
                         <FaChevronRight className="text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition" />
@@ -303,7 +362,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Categories Section with Hover Effects */}
+      {/* Categories Section */}
       <section className="container mx-auto px-4 -mt-20 relative z-10">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 flex items-center">
@@ -315,64 +374,69 @@ const Home = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {categories.map((category, index) => {
-            const details = getCategoryDetails(category.name);
-            return (
-              <motion.div
-                key={category._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                whileHover={{ y: -5 }}
-                onHoverStart={() => setActiveCategory(category._id)}
-                onHoverEnd={() => setActiveCategory(null)}
-              >
-                <Link to={`/category/${category._id}`}>
-                  <div className={`bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group`}>
-                    {/* Colored Top Bar */}
-                    <div className={`h-2 bg-gradient-to-r ${details.color}`}></div>
-                    
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className={`${details.iconBg} p-4 rounded-xl group-hover:scale-110 transition-transform`}>
-                          <div className={`text-2xl ${details.text}`}>
-                            {details.icon}
+        {categories.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {categories.map((category, index) => {
+              const details = getCategoryDetails(category.name);
+              return (
+                <motion.div
+                  key={category._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  whileHover={{ y: -5 }}
+                  onHoverStart={() => setActiveCategory(category._id)}
+                  onHoverEnd={() => setActiveCategory(null)}
+                >
+                  <Link to={`/category/${category._id}`}>
+                    <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group">
+                      {/* Colored Top Bar */}
+                      <div className={`h-2 bg-gradient-to-r ${details.color}`}></div>
+                      
+                      <div className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className={`${details.iconBg} p-4 rounded-xl group-hover:scale-110 transition-transform`}>
+                            <div className={`text-2xl ${details.text}`}>
+                              {details.icon}
+                            </div>
                           </div>
+                          <span className="text-sm font-medium text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
+                            {category.order}
+                          </span>
                         </div>
-                        <span className="text-sm font-medium text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
-                          {category.order}
-                        </span>
-                      </div>
-                      
-                      <h3 className={`text-xl font-bold text-gray-800 mb-2 group-hover:${details.text} transition`}>
-                        {category.name}
-                      </h3>
-                      
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                        {category.description}
-                      </p>
+                        
+                        <h3 className={`text-xl font-bold text-gray-800 mb-2 group-hover:${details.text} transition`}>
+                          {category.name}
+                        </h3>
+                        
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                          {category.description}
+                        </p>
 
-                      {/* Animated Stats */}
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center space-x-2 text-gray-500">
-                          <FaBookOpen className="text-xs" />
-                          <span>24 topics</span>
-                        </div>
-                        <div className={`${details.text} font-medium flex items-center group-hover:translate-x-2 transition-transform`}>
-                          Explore <FaArrowRight className="ml-1 text-xs" />
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center space-x-2 text-gray-500">
+                            <FaBookOpen className="text-xs" />
+                            <span>Topics</span>
+                          </div>
+                          <div className={`${details.text} font-medium flex items-center group-hover:translate-x-2 transition-transform`}>
+                            Explore <FaArrowRight className="ml-1 text-xs" />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-white rounded-lg shadow">
+            <p className="text-gray-500">No categories found</p>
+          </div>
+        )}
       </section>
 
-      {/* Featured Topics Carousel */}
+      {/* Featured Topics */}
       {featuredTopics.length > 0 && (
         <section className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 flex items-center">
@@ -395,11 +459,13 @@ const Home = () => {
                       {topic.videoUrl ? <FaVideo className="text-purple-600" /> : <FaFileAlt className="text-pink-600" />}
                     </div>
                     <h3 className="font-bold text-gray-800 mb-2 line-clamp-2">{topic.title}</h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{topic.theory?.substring(0, 100)}...</p>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      {topic.theory?.substring(0, 100)}...
+                    </p>
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span className="bg-white px-2 py-1 rounded-full">{topic.sectionId?.name}</span>
+                      <span className="bg-white px-2 py-1 rounded-full">{getSectionName(topic)}</span>
                       <span className="flex items-center">
-                        <FaRegEye className="mr-1" /> 1.2k
+                        <FaRegEye className="mr-1" /> {getViewCount(topic)}
                       </span>
                     </div>
                   </div>
@@ -410,10 +476,10 @@ const Home = () => {
         </section>
       )}
 
-      {/* Two Column Layout for Recent & Trending */}
+      {/* Recent & Trending */}
       <section className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Topics with Timeline */}
+          {/* Recent Topics */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -423,14 +489,13 @@ const Home = () => {
             <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
               <FaClock className="mr-3 text-green-600" />
               Recently Added
-              <span className="ml-auto text-sm font-normal text-gray-500">Last 7 days</span>
             </h2>
             
             <div className="space-y-4">
               {recentTopics.length > 0 ? (
                 recentTopics.map((topic, index) => (
                   <motion.div
-                    key={index}
+                    key={topic._id || index}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
@@ -448,9 +513,9 @@ const Home = () => {
                             {topic.theory?.substring(0, 80)}...
                           </p>
                           <div className="flex items-center mt-2 text-xs text-gray-400">
-                            <span>{topic.sectionId?.name}</span>
+                            <span>{getSectionName(topic)}</span>
                             <span className="mx-2">•</span>
-                            <span>{new Date(topic.createdAt).toLocaleDateString()}</span>
+                            <span>{formatDate(topic.createdAt)}</span>
                           </div>
                         </div>
                         <FaChevronRight className="text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition" />
@@ -459,16 +524,20 @@ const Home = () => {
                   </motion.div>
                 ))
               ) : (
-                <p className="text-gray-500 text-center py-8">No recent topics</p>
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No recent topics</p>
+                </div>
               )}
             </div>
             
-            <Link to="/recent" className="mt-6 block text-center text-green-600 hover:text-green-700 font-medium">
-              View All Recent Topics →
-            </Link>
+            {recentTopics.length > 0 && (
+              <Link to="/recent" className="mt-6 block text-center text-green-600 hover:text-green-700 font-medium">
+                View All Recent Topics →
+              </Link>
+            )}
           </motion.div>
 
-          {/* Trending Topics with Heat Effect */}
+          {/* Trending Topics */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -478,14 +547,13 @@ const Home = () => {
             <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
               <FaFire className="mr-3 text-orange-600" />
               Trending Now
-              <span className="ml-auto text-sm font-normal text-gray-500">Most viewed</span>
             </h2>
             
             <div className="space-y-4">
               {trendingTopics.length > 0 ? (
                 trendingTopics.map((topic, index) => (
                   <motion.div
-                    key={index}
+                    key={topic._id || index}
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
@@ -508,10 +576,10 @@ const Home = () => {
                             {topic.theory?.substring(0, 80)}...
                           </p>
                           <div className="flex items-center mt-2 text-xs text-gray-400">
-                            <span>{topic.sectionId?.name}</span>
+                            <span>{getSectionName(topic)}</span>
                             <span className="mx-2">•</span>
                             <span className="flex items-center">
-                              <FaRegEye className="mr-1" /> {Math.floor(Math.random() * 1000) + 500} views
+                              <FaRegEye className="mr-1" /> {getViewCount(topic)} views
                             </span>
                           </div>
                         </div>
@@ -521,18 +589,22 @@ const Home = () => {
                   </motion.div>
                 ))
               ) : (
-                <p className="text-gray-500 text-center py-8">No trending topics</p>
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No trending topics</p>
+                </div>
               )}
             </div>
             
-            <Link to="/trending" className="mt-6 block text-center text-orange-600 hover:text-orange-700 font-medium">
-              View All Trending Topics →
-            </Link>
+            {trendingTopics.length > 0 && (
+              <Link to="/trending" className="mt-6 block text-center text-orange-600 hover:text-orange-700 font-medium">
+                View All Trending Topics →
+              </Link>
+            )}
           </motion.div>
         </div>
       </section>
 
-      {/* AI Assistant Premium Banner */}
+      {/* AI Assistant Banner */}
       <section className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -540,7 +612,7 @@ const Home = () => {
           transition={{ delay: 0.5 }}
           className="relative overflow-hidden rounded-3xl"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 animate-gradient-x"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600"></div>
           <div className="absolute inset-0 bg-black opacity-10"></div>
           
           <div className="relative px-8 py-12 md:py-16 text-white">
@@ -555,12 +627,10 @@ const Home = () => {
                     Get instant answers, explanations, and personalized learning recommendations
                   </p>
                   
-                  {/* Feature Pills */}
                   <div className="flex flex-wrap gap-2 mt-4">
                     <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm">24/7 Available</span>
                     <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm">Smart Explanations</span>
                     <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm">Topic Recommendations</span>
-                    <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm">Progress Tracking</span>
                   </div>
                 </div>
               </div>
@@ -575,7 +645,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full filter blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-white opacity-10 rounded-full filter blur-3xl"></div>
         </motion.div>
@@ -623,33 +692,6 @@ const Home = () => {
               </span>
             </motion.div>
           </Link>
-        </div>
-      </section>
-
-      {/* Newsletter Section */}
-      <section className="container mx-auto px-4">
-        <div className="bg-gray-900 rounded-3xl p-8 md:p-12 text-white">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Stay Updated</h2>
-            <p className="text-xl text-gray-300 mb-8">
-              Get the latest topics, learning resources, and platform updates
-            </p>
-            
-            <form className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-6 py-4 rounded-xl text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-500"
-              />
-              <button className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl font-semibold hover:shadow-lg transition hover:scale-105">
-                Subscribe
-              </button>
-            </form>
-            
-            <p className="text-sm text-gray-400 mt-4">
-              Join 10,000+ learners. No spam, unsubscribe anytime.
-            </p>
-          </div>
         </div>
       </section>
     </div>

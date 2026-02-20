@@ -16,13 +16,26 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedToken = localStorage.getItem('token');
-    
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const loadUser = async () => {
+      const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      
+      if (token && storedUser) {
+        try {
+          // Verify token and get fresh user data
+          const response = await api.get('/auth/me');
+          setUser(response.data.user);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+        } catch (error) {
+          console.error('Error loading user:', error);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+      }
+      setLoading(false);
+    };
+
+    loadUser();
   }, []);
 
   const login = async (email, password) => {
@@ -67,12 +80,18 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Helper function to check if user is admin
+  const isAdmin = () => {
+    return user?.role === 'admin' || user?.isAdmin === true;
+  };
+
   const value = {
     user,
     login,
     register,
     logout,
-    loading
+    loading,
+    isAdmin
   };
 
   return (

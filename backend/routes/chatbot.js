@@ -1,3 +1,7 @@
+const express = require('express');
+const router = express.Router();
+const ChatHistory = require('../models/ChatHistory'); // make sure this path is correct
+
 // Clear history
 router.delete('/history/:sessionId', async (req, res) => {
   try {
@@ -7,3 +11,5 @@ router.delete('/history/:sessionId', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+module.exports = router;

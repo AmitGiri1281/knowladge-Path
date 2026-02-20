@@ -17,6 +17,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'moderator'],
+    default: 'user'
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
   progress: [{
     contentId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -37,15 +46,15 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Content'
   }],
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
-  },
   createdAt: {
     type: Date,
     default: Date.now
   }
+});
+
+// Virtual to check if user is admin
+userSchema.virtual('isAdministrator').get(function() {
+  return this.role === 'admin' || this.isAdmin === true;
 });
 
 module.exports = mongoose.model('User', userSchema);

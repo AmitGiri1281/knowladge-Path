@@ -6,7 +6,6 @@ import {
   FaBars, 
   FaTimes,
   FaUser,
-  FaSignInAlt,
   FaUserPlus,
   FaSignOutAlt,
   FaUserCircle,
@@ -14,8 +13,11 @@ import {
   FaGraduationCap,
   FaRobot,
   FaHeart,
-  FaClock
+  FaClock,
+  FaSignInAlt,
+  FaCog  // Added for admin
 } from 'react-icons/fa';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -128,6 +130,11 @@ const Navbar = () => {
     return icons[categoryName] || '📚';
   };
 
+  // Check if user is admin
+  const isAdmin = () => {
+    return user?.role === 'admin' || user?.isAdmin === true;
+  };
+
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -140,7 +147,7 @@ const Navbar = () => {
             </div>
             <div>
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Knowlade Path
+                Knowledge PathWay
               </span>
               <span className="hidden md:inline-block ml-2 text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">
                 Beta
@@ -321,6 +328,11 @@ const Navbar = () => {
                         <div className="p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
                           <div className="font-semibold">{user.name}</div>
                           <div className="text-sm opacity-90">{user.email}</div>
+                          {isAdmin() && (
+                            <span className="inline-block mt-1 text-xs bg-yellow-300 text-yellow-800 px-2 py-0.5 rounded-full">
+                              Admin
+                            </span>
+                          )}
                         </div>
                         <div className="p-2">
                           <Link
@@ -339,6 +351,19 @@ const Navbar = () => {
                             <FaBook className="text-blue-600" />
                             <span>My Learning</span>
                           </Link>
+                          
+                          {/* Admin Link - Only for admins */}
+                          {isAdmin() && (
+                            <Link
+                              to="/admin"
+                              className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-purple-50 rounded-lg transition"
+                              onClick={() => setShowUserMenu(false)}
+                            >
+                              <FaCog className="text-purple-600" />
+                              <span>Admin Panel</span>
+                            </Link>
+                          )}
+                          
                           <button
                             onClick={handleLogout}
                             className="w-full flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-red-50 rounded-lg transition"
@@ -452,7 +477,42 @@ const Navbar = () => {
                   </Link>
                 </div>
 
-                {/* Mobile Auth */}
+                {/* Mobile User Info - if logged in */}
+                {user && (
+                  <div className="space-y-2">
+                    <div className="px-2 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                      <p className="font-medium text-gray-800">{user.name}</p>
+                      <p className="text-sm text-gray-600">{user.email}</p>
+                      {isAdmin() && (
+                        <span className="inline-block mt-1 text-xs bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded-full">
+                          Admin
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Mobile Admin Link */}
+                    {isAdmin() && (
+                      <Link
+                        to="/admin"
+                        className="flex items-center justify-center space-x-2 p-3 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <FaCog />
+                        <span>Admin Panel</span>
+                      </Link>
+                    )}
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center justify-center space-x-2 p-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition"
+                    >
+                      <FaSignOutAlt />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Mobile Auth - if not logged in */}
                 {!user && (
                   <div className="grid grid-cols-2 gap-2 pt-2">
                     <Link
