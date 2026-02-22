@@ -38,6 +38,8 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, []);
 
+
+
   const login = async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password });
@@ -55,6 +57,16 @@ export const AuthProvider = ({ children }) => {
       };
     }
   };
+
+
+
+
+
+
+
+
+
+  
 
   const register = async (name, email, password) => {
     try {

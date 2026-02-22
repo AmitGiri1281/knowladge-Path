@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import ReactPlayer from 'react-player';
 import ReactMarkdown from 'react-markdown';
 import { FaArrowLeft, FaCheck, FaBookmark, FaShare } from 'react-icons/fa';
-import axios from 'axios';
+import api from '../services/api'; // <-- use your centralized api
 
 const ContentPage = () => {
   const { id } = useParams();
@@ -17,19 +17,17 @@ const ContentPage = () => {
   useEffect(() => {
     fetchContent();
   }, [id]);
-
-  const fetchContent = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`http://localhost:5000/api/content/${id}`);
-      setContent(response.data);
-    } catch (error) {
-      console.error('Error fetching content:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+const fetchContent = async () => {
+  try {
+    setLoading(true);
+    const response = await api.get(`/content/${id}`); // <-- use api instance
+    setContent(response.data);
+  } catch (error) {
+    console.error('Error fetching content:', error);
+  } finally {
+    setLoading(false);
+  }
+};
   const handleQuizAnswer = (questionIndex, answerIndex) => {
     setQuizAnswers({
       ...quizAnswers,
@@ -93,21 +91,26 @@ const ContentPage = () => {
       </div>
 
       {/* Video Section */}
-      {content.videoUrl && (
-        <div className="bg-black rounded-lg overflow-hidden aspect-video">
-          <ReactPlayer
-            url={content.videoUrl}
-            width="100%"
-            height="100%"
-            controls
-            config={{
-              youtube: {
-                playerVars: { showinfo: 1 }
-              }
-            }}
-          />
-        </div>
-      )}
+    {content.videoUrl && (
+  <div className="bg-black rounded-lg overflow-hidden aspect-video">
+  <ReactPlayer
+  url={content.videoUrl}
+  width="100%"
+  height="100%"
+  controls
+  config={{
+    youtube: {
+      playerVars: {
+        showinfo: 1,
+        modestbranding: 1,
+        rel: 0,
+        origin: window.location.origin, // ✅ important for localhost
+      }
+    }
+  }}
+/>
+  </div>
+)}
 
       {/* Tabs */}
       <div className="border-b border-gray-200">

@@ -23,41 +23,42 @@ const PopularPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-gray-800 mb-4 flex items-center">
-        <FaFire className="mr-3 text-orange-600" />
-        Popular Topics
+        <FaFire className="mr-3 text-orange-600" /> Popular Topics
       </h1>
       <p className="text-xl text-gray-600 mb-8">Most viewed content in our knowledge base</p>
 
-      {popularTopics.length > 0 ? (
-        <div className="space-y-4">
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-gray-200 h-48 rounded-lg"></div>
+          ))}
+        </div>
+      ) : popularTopics.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {popularTopics.map((topic, index) => (
             <motion.div
               key={topic._id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
             >
-              <Link to={`/content/${topic._id}`}>
-                <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition border-l-4 border-orange-500">
+              <Link to={`/content/${topic._id}`} aria-label={`View topic ${topic.title}`}>
+                <div className="bg-white rounded-lg shadow p-6 hover:shadow-xl transition border-l-4 border-orange-500">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h2 className="text-xl font-semibold text-gray-800 mb-2">{topic.title}</h2>
-                      <p className="text-gray-600 mb-3 line-clamp-2">
-                        {topic.theory?.replace(/[#*`]/g, '').substring(0, 200)}...
+                      <h2 className="text-xl font-semibold text-gray-800 mb-2 hover:text-orange-600 transition">
+                        {topic.title || 'Untitled Topic'}
+                      </h2>
+                      <p className="text-gray-600 mb-3 line-clamp-3">
+                        {topic.theory?.replace(/[#*`]/g, '') || 'No description available.'}
                       </p>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <span className="bg-orange-100 px-2 py-1 rounded">{topic.sectionId?.name}</span>
+                      <div className="flex items-center text-sm text-gray-500 flex-wrap gap-2">
+                        <span className="bg-orange-100 px-2 py-1 rounded">
+                          {topic.sectionId?.name || 'General'}
+                        </span>
                         <span className="mx-2">•</span>
                         <span className="flex items-center">
                           <FaEye className="mr-1" /> {topic.views || 0} views

@@ -2,34 +2,55 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaPlay, FaFileAlt, FaQuestionCircle } from 'react-icons/fa';
-import axios from 'axios';
+import api from '../services/api';
 
 const SectionPage = () => {
   const { id } = useParams();
   const [section, setSection] = useState(null);
   const [contents, setContents] = useState([]);
+  const [relatedSections, setRelatedSections] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch section data
   useEffect(() => {
+    const fetchSectionData = async () => {
+      try {
+        setLoading(true);
+        const [sectionRes, contentsRes] = await Promise.all([
+          api.get(`/sections/${id}`),
+          api.get(`/content/section/${id}`)
+        ]);
+
+        setSection(sectionRes.data);
+        setContents(contentsRes.data);
+      } catch (error) {
+        console.error('Error fetching section data:', error);
+        if (error.response) {
+          console.error('Response data:', error.response.data);
+          console.error('Status:', error.response.status);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchSectionData();
   }, [id]);
 
-  const fetchSectionData = async () => {
-    try {
-      setLoading(true);
-      const [sectionRes, contentsRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/sections/${id}`),
-        axios.get(`http://localhost:5000/api/content/section/${id}`)
-      ]);
-      
-      setSection(sectionRes.data);
-      setContents(contentsRes.data);
-    } catch (error) {
-      console.error('Error fetching section data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Fetch related sections after section loads
+  useEffect(() => {
+    const fetchRelatedSections = async () => {
+      if (!section) return;
+      try {
+        const res = await api.get(`/sections/related/${section.categoryId?._id}`);
+        setRelatedSections(res.data);
+      } catch (error) {
+        console.error('Error fetching related sections:', error);
+      }
+    };
+
+    fetchRelatedSections();
+  }, [section]);
 
   if (loading) {
     return (
@@ -42,6 +63,10 @@ const SectionPage = () => {
   if (!section) {
     return <div className="text-center text-red-600">Section not found</div>;
   }
+
+  // Calculate user progress dynamically
+  const completedTopics = contents.filter(c => c.completed).length;
+  const progressPercent = contents.length ? (completedTopics / contents.length) * 100 : 0;
 
   return (
     <div className="space-y-8">
@@ -83,12 +108,8 @@ const SectionPage = () => {
                        <FaQuestionCircle className="text-blue-600" />}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        {content.title}
-                      </h3>
-                      <p className="text-gray-600 line-clamp-2">
-                        {content.theory.substring(0, 150)}...
-                      </p>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-2">{content.title}</h3>
+                      <p className="text-gray-600 line-clamp-2">{content.theory?.substring(0, 150)}...</p>
                       <div className="mt-3 flex items-center space-x-4 text-sm text-gray-500">
                         {content.videoUrl && <span>🎥 Video</span>}
                         {content.notes && <span>📝 Notes</span>}
@@ -108,27 +129,21 @@ const SectionPage = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Progress</h3>
             <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-              <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: '30%' }}></div>
+              <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${progressPercent}%` }}></div>
             </div>
-            <p className="text-sm text-gray-600">30% complete (3/10 topics)</p>
+            <p className="text-sm text-gray-600">{progressPercent.toFixed(0)}% complete ({completedTopics}/{contents.length} topics)</p>
           </div>
 
           {/* Resources Card */}
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Section Resources</h3>
             <ul className="space-y-2">
-              <li className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 cursor-pointer">
-                <FaFileAlt className="text-sm" />
-                <span>Practice Problems</span>
-              </li>
-              <li className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 cursor-pointer">
-                <FaFileAlt className="text-sm" />
-                <span>Reference Materials</span>
-              </li>
-              <li className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 cursor-pointer">
-                <FaFileAlt className="text-sm" />
-                <span>Additional Readings</span>
-              </li>
+              {section.resources?.map((res, i) => (
+                <li key={i} className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 cursor-pointer">
+                  <FaFileAlt className="text-sm" />
+                  <span>{res.title}</span>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -136,15 +151,11 @@ const SectionPage = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Related Sections</h3>
             <ul className="space-y-2">
-              <li className="text-gray-600 hover:text-blue-600 cursor-pointer">
-                Introduction to Programming
-              </li>
-              <li className="text-gray-600 hover:text-blue-600 cursor-pointer">
-                Advanced Concepts
-              </li>
-              <li className="text-gray-600 hover:text-blue-600 cursor-pointer">
-                Practice Projects
-              </li>
+              {relatedSections.map(rs => (
+                <li key={rs._id} className="text-gray-600 hover:text-blue-600 cursor-pointer">
+                  {rs.name}
+                </li>
+              ))}
             </ul>
           </div>
         </div>

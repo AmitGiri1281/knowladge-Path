@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import api from '../services/api';
 
 const CategoryPage = () => {
   const { id } = useParams();
@@ -13,22 +13,26 @@ const CategoryPage = () => {
     fetchCategoryData();
   }, [id]);
 
-  const fetchCategoryData = async () => {
-    try {
-      setLoading(true);
-      const [categoryRes, sectionsRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/categories/${id}`),
-        axios.get(`http://localhost:5000/api/sections/category/${id}`)
-      ]);
-      
-      setCategory(categoryRes.data);
-      setSections(sectionsRes.data);
-    } catch (error) {
-      console.error('Error fetching category data:', error);
-    } finally {
-      setLoading(false);
+const fetchCategoryData = async () => {
+  try {
+    setLoading(true);
+    const [categoryRes, sectionsRes] = await Promise.all([
+      api.get(`/categories/${id}`),
+      api.get(`/sections/category/${id}`)
+    ]);
+    
+    setCategory(categoryRes.data);
+    setSections(sectionsRes.data);
+  } catch (error) {
+    console.error('Error fetching category data:', error);
+    if (error.response) {
+      console.error('Response data:', error.response.data);
+      console.error('Status:', error.response.status);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (loading) {
     return (
@@ -75,7 +79,7 @@ const CategoryPage = () => {
                   <p className="text-gray-600 mb-4">{section.description}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-blue-600 font-medium">Start Learning →</span>
-                    <span className="text-sm text-gray-500">12 topics</span>
+                    <span className="text-sm text-gray-500">{section.topics?.length || 0} topics</span>
                   </div>
                 </div>
               </div>
