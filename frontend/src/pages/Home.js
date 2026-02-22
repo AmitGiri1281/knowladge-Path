@@ -245,9 +245,9 @@ const Home = () => {
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              Your Journey to
+              Share Knowledge
               <span className="block bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent">
-                Infinite Knowledge
+                without Boundries
               </span>
             </h1>
             
