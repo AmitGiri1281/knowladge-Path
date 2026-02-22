@@ -126,7 +126,7 @@ const Chatbot = () => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-110 z-50 group"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-110 z-50 group"
         aria-label="Open chat assistant"
       >
         <FaRobot className="text-2xl group-hover:rotate-12 transition-transform" />
@@ -135,10 +135,18 @@ const Chatbot = () => {
   }
 
   return (
-    <div className={`fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl transition-all duration-300 z-50 ${isMinimized ? 'h-14' : 'h-[550px]'}`}>
+ <div
+  className={`fixed z-50 flex flex-col
+  bg-white shadow-2xl
+  transition-all duration-300
+  rounded-none sm:rounded-lg
+  bottom-0 right-0 w-full h-full
+  sm:bottom-6 sm:right-6 sm:w-96 sm:h-[550px]
+  ${isMinimized ? 'h-14 sm:h-14' : ''}`}
+>
       {/* Header */}
       <div 
-        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-t-lg flex justify-between items-center cursor-pointer hover:from-blue-700 hover:to-purple-700 transition"
+        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-none sm:rounded-t-lg flex justify-between items-center cursor-pointer hover:from-blue-700 hover:to-purple-700 transition"
         onClick={() => setIsMinimized(!isMinimized)}
       >
         <div className="flex items-center space-x-2">
@@ -169,7 +177,7 @@ const Chatbot = () => {
       {!isMinimized && (
         <>
           {/* Messages */}
-          <div className="h-[430px] overflow-y-auto p-4 bg-gray-50" ref={messagesEndRef}>
+       <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
             {messages.length === 0 ? (
               <div className="text-center text-gray-500 mt-8">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -226,17 +234,23 @@ const Chatbot = () => {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 border-t bg-white rounded-b-lg">
+          <div className="p-4 border-t bg-white rounded-none sm:rounded-b-lg">
             <div className="flex items-center space-x-2">
-              <textarea
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
-                className="flex-1 border border-gray-200 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm"
-                rows="1"
-                style={{ maxHeight: '100px' }}
-              />
+             <textarea
+  value={inputMessage}
+  onChange={(e) => {
+    setInputMessage(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = e.target.scrollHeight + "px";
+  }}
+  onKeyDown={handleKeyPress}
+  placeholder="Type your message..."
+  rows={1}
+  className="flex-1 w-full border border-gray-200 rounded-lg p-3 resize-none 
+  focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent 
+  text-sm sm:text-base leading-relaxed"
+  style={{ maxHeight: "120px" }}
+/>
               <button
                 onClick={sendMessage}
                 disabled={!inputMessage.trim()}
