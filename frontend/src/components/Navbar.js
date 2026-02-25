@@ -41,6 +41,53 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
+// Sub-component for Resources Menu
+const ResourcesMenu = ({ onClose }) => {
+  const resources = [
+    { name: "Books", path: "/resources/books", icon: "📚" },
+    { name: "Journals", path: "/resources/journals", icon: "📓" },
+    { name: "Newspapers & Magazines", path: "/resources/news", icon: "📰" },
+    { name: "Workshops", path: "/resources/workshops", icon: "🔧" },
+    { name: "Conferences", path: "/resources/conferences", icon: "🎤" },
+    { name: "Videos", path: "/resources/videos", icon: "🎥" },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
+      transition={{ duration: 0.2 }}
+      className="absolute mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden"
+      role="menu"
+      aria-label="Resources menu"
+    >
+      <div className="py-2">
+        {resources.map((item) => (
+          <Link
+            key={item.name}
+            to={item.path}
+            className="flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 text-gray-700 hover:text-blue-600 transition group"
+            onClick={onClose}
+            role="menuitem"
+          >
+            <span className="text-xl" aria-hidden="true">{item.icon}</span>
+            <span className="font-medium">{item.name}</span>
+          </Link>
+        ))}
+      </div>
+      
+      {/* Resources Footer */}
+      <div className="bg-gradient-to-r from-green-600 to-teal-600 p-3 text-white">
+        <div className="flex items-center space-x-2">
+          <FaBook className="text-sm" aria-hidden="true" />
+          <span className="text-xs">External reference links only</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 // Sub-component for Mega Menu
 const MegaMenu = ({ categories, sections, onClose }) => {
   const getCategoryIcon = (categoryName) => {
@@ -254,6 +301,7 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showMegaMenu, setShowMegaMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showResources, setShowResources] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -263,6 +311,7 @@ const Navbar = () => {
   const megaMenuRef = useRef(null);
   const userMenuRef = useRef(null);
   const searchRef = useRef(null);
+  const resourcesRef = useRef(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -281,6 +330,9 @@ const Navbar = () => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSearchResults(false);
       }
+      if (resourcesRef.current && !resourcesRef.current.contains(event.target)) {
+        setShowResources(false);
+      }
     };
 
     const handleEscape = (event) => {
@@ -288,6 +340,7 @@ const Navbar = () => {
         setShowMegaMenu(false);
         setShowUserMenu(false);
         setShowSearchResults(false);
+        setShowResources(false);
         setIsOpen(false);
       }
     };
@@ -460,6 +513,29 @@ const Navbar = () => {
                     sections={sections} 
                     onClose={() => setShowMegaMenu(false)} 
                   />
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Resources Dropdown */}
+            <div className="relative" ref={resourcesRef}>
+              <button
+                onClick={() => setShowResources(!showResources)}
+                className="flex items-center space-x-1 px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition group focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-expanded={showResources}
+                aria-haspopup="true"
+                aria-label="Resources menu"
+              >
+                <span className="font-medium">Resources</span>
+                <FaChevronDown
+                  className={`text-sm transition-transform duration-200 ${showResources ? 'rotate-180' : ''}`}
+                  aria-hidden="true"
+                />
+              </button>
+
+              <AnimatePresence>
+                {showResources && (
+                  <ResourcesMenu onClose={() => setShowResources(false)} />
                 )}
               </AnimatePresence>
             </div>
@@ -641,6 +717,61 @@ const Navbar = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+
+                  {/* Mobile Resources */}
+                  <div className="space-y-2 px-4">
+                    <div className="font-semibold text-gray-800">Resources</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Link
+                        to="/resources/books"
+                        className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg text-gray-700 hover:bg-blue-50 transition"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span className="text-xl">📚</span>
+                        <span>Books</span>
+                      </Link>
+                      <Link
+                        to="/resources/journals"
+                        className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg text-gray-700 hover:bg-blue-50 transition"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span className="text-xl">📓</span>
+                        <span>Journals</span>
+                      </Link>
+                      <Link
+                        to="/resources/news"
+                        className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg text-gray-700 hover:bg-blue-50 transition"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span className="text-xl">📰</span>
+                        <span>News & Mag</span>
+                      </Link>
+                      <Link
+                        to="/resources/workshops"
+                        className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg text-gray-700 hover:bg-blue-50 transition"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span className="text-xl">🔧</span>
+                        <span>Workshops</span>
+                      </Link>
+                      <Link
+                        to="/resources/conferences"
+                        className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg text-gray-700 hover:bg-blue-50 transition"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span className="text-xl">🎤</span>
+                        <span>Conferences</span>
+                      </Link>
+                      <Link
+                        to="/resources/videos"
+                        className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg text-gray-700 hover:bg-blue-50 transition"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span className="text-xl">🎥</span>
+                        <span>Videos</span>
+                      </Link>
+                    </div>
                   </div>
 
                   {/* Mobile Quick Links */}

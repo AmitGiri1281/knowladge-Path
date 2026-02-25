@@ -17,6 +17,12 @@ import Chatbot from './components/Chatbot';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
+import Books from './pages/Books';
+import Journals from './pages/Journals';
+import NewsMagazines from './pages/NewsMagazines';
+import Workshops from './pages/Workshops';
+import Conferences from './pages/Conferences';
+import Videos from './pages/Videos';
 
 function App() {
   return (
@@ -35,6 +41,12 @@ function App() {
               <Route path="/content/:id" element={<ContentPage />} />
               <Route path="/recent" element={<RecentPage />} />
               <Route path="/popular" element={<PopularPage />} />
+              <Route path="/resources/books" element={<Books />} />
+<Route path="/resources/journals" element={<Journals />} />
+<Route path="/resources/news" element={<NewsMagazines />} />
+<Route path="/resources/workshops" element={<Workshops />} />
+<Route path="/resources/conferences" element={<Conferences />} />
+<Route path="/resources/videos" element={<Videos />} />
               
               {/* Auth Routes */}
               <Route path="/login" element={<Login />} />
