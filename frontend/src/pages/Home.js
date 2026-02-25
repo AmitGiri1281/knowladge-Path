@@ -3022,12 +3022,13 @@ const Home = () => {
       <section className="relative overflow-hidden min-h-[600px] flex items-center">
         {/* Background Image */}
         <div className="absolute inset-0">
-          <img 
-            src={backgroundImages.hero}
-            alt="Hero background"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-purple-900/90 to-pink-900/90"></div>
+         <img 
+  src={backgroundImages.hero}
+  alt="Hero background"
+  className="w-full h-full object-cover brightness-110"
+/>
+
+<div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent"></div>
         </div>
         
         {/* Animated overlay elements */}
