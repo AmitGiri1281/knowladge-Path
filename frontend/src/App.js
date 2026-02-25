@@ -12,11 +12,14 @@ import PopularPage from './pages/PopularPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
-import AdminPage from './pages/AdminPage';  // Import AdminPage
+import AdminPage from './pages/AdminPage';
 import Chatbot from './components/Chatbot';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
+
+// Import Resource Pages
+import Resources from './pages/Resources';  // Add this import
 import Books from './pages/Books';
 import Journals from './pages/Journals';
 import NewsMagazines from './pages/NewsMagazines';
@@ -41,12 +44,15 @@ function App() {
               <Route path="/content/:id" element={<ContentPage />} />
               <Route path="/recent" element={<RecentPage />} />
               <Route path="/popular" element={<PopularPage />} />
+              
+              {/* Resource Routes - Add the main route first */}
+              <Route path="/resources" element={<Resources />} />  {/* Add this line */}
               <Route path="/resources/books" element={<Books />} />
-<Route path="/resources/journals" element={<Journals />} />
-<Route path="/resources/news" element={<NewsMagazines />} />
-<Route path="/resources/workshops" element={<Workshops />} />
-<Route path="/resources/conferences" element={<Conferences />} />
-<Route path="/resources/videos" element={<Videos />} />
+              <Route path="/resources/journals" element={<Journals />} />
+              <Route path="/resources/news" element={<NewsMagazines />} />
+              <Route path="/resources/workshops" element={<Workshops />} />
+              <Route path="/resources/conferences" element={<Conferences />} />
+              <Route path="/resources/videos" element={<Videos />} />
               
               {/* Auth Routes */}
               <Route path="/login" element={<Login />} />
