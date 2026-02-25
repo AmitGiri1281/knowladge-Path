@@ -1,8 +1,11 @@
-import React from 'react';
-import { FaExternalLinkAlt, FaBookOpen, FaUniversity, FaFlask } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { FaExternalLinkAlt, FaBookOpen, FaUniversity, FaFlask, FaSearch, FaFilter } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Journals = () => {
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
+
   const journals = [
     {
       title: "Google Scholar",
@@ -111,6 +114,25 @@ const Journals = () => {
     }
   ];
 
+  // Get unique categories
+  const categories = ['All', ...new Set(journals.map(journal => journal.category))];
+
+  // Filter journals based on selected category and search term
+  const filteredJournals = journals.filter(journal => {
+    const matchesCategory = selectedCategory === 'All' || journal.category === selectedCategory;
+    const matchesSearch = journal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         journal.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         journal.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         journal.features.some(feature => feature.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
+
+  // Get count for each category
+  const getCategoryCount = (category) => {
+    if (category === 'All') return journals.length;
+    return journals.filter(journal => journal.category === category).length;
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -144,40 +166,119 @@ const Journals = () => {
           </div>
         </div>
 
-        {/* Journals Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {journals.map((journal, index) => (
-            <motion.a
-              key={index}
-              href={journal.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="block p-6 bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all group"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-green-100 rounded-lg group-hover:bg-green-200 transition">
-                  <FaBookOpen className="text-2xl text-green-600" />
-                </div>
-                <FaExternalLinkAlt className="text-gray-400 group-hover:text-green-600 transition" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">{journal.title}</h3>
-              <p className="text-gray-600 mb-4 text-sm">{journal.description}</p>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {journal.features.map((feature, i) => (
-                  <span key={i} className="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded-full">
-                    {feature}
-                  </span>
-                ))}
-              </div>
-              <span className="inline-block px-3 py-1 bg-green-50 text-sm text-green-600 rounded-full">
-                {journal.category}
-              </span>
-            </motion.a>
-          ))}
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <input
+              type="text"
+              placeholder="Search journals by title, description, or features..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
         </div>
+
+        {/* Categories Filter */}
+        <div className="mb-6">
+          <div className="flex items-center mb-3">
+            <FaFilter className="text-gray-600 mr-2" />
+            <span className="text-gray-700 font-medium">Filter by Category:</span>
+            {selectedCategory !== 'All' && (
+              <button
+                onClick={() => setSelectedCategory('All')}
+                className="ml-3 text-sm text-green-600 hover:text-green-700"
+              >
+                Clear Filter
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {categories.map(category => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  selectedCategory === category
+                    ? 'bg-green-600 text-white shadow-md scale-105'
+                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {category} ({getCategoryCount(category)})
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Results Count */}
+        <div className="mb-4 text-sm text-gray-600">
+          Showing {filteredJournals.length} of {journals.length} journals
+        </div>
+
+        {/* Journals Grid */}
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={selectedCategory + searchTerm}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {filteredJournals.length > 0 ? (
+              filteredJournals.map((journal, index) => (
+                <motion.a
+                  key={index}
+                  href={journal.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ y: -5 }}
+                  className="block p-6 bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all group"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="p-3 bg-green-100 rounded-lg group-hover:bg-green-200 transition">
+                      <FaBookOpen className="text-2xl text-green-600" />
+                    </div>
+                    <FaExternalLinkAlt className="text-gray-400 group-hover:text-green-600 transition" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">{journal.title}</h3>
+                  <p className="text-gray-600 mb-4 text-sm">{journal.description}</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {journal.features.map((feature, i) => (
+                      <span key={i} className="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded-full">
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                  <span className="inline-block px-3 py-1 bg-green-50 text-sm text-green-600 rounded-full">
+                    {journal.category}
+                  </span>
+                </motion.a>
+              ))
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="col-span-full text-center py-12"
+              >
+                <p className="text-gray-500 text-lg">No journals found matching your criteria.</p>
+                <button
+                  onClick={() => {
+                    setSelectedCategory('All');
+                    setSearchTerm('');
+                  }}
+                  className="mt-4 text-green-600 hover:text-green-700 font-medium"
+                >
+                  Clear all filters
+                </button>
+              </motion.div>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Tips */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">

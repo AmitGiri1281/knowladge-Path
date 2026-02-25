@@ -1,8 +1,12 @@
-import React from 'react';
-import { FaExternalLinkAlt, FaCalendar, FaVideo, FaUsers, FaMicrophone } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { FaExternalLinkAlt, FaCalendar, FaVideo, FaUsers, FaMicrophone, FaSearch, FaFilter } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Conferences = () => {
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedType, setSelectedType] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
+
   const conferences = [
     {
       title: "TED Talks",
@@ -150,6 +154,43 @@ const Conferences = () => {
     }
   ];
 
+  // Get unique categories and types
+  const categories = ['All', ...new Set(conferences.map(c => c.category))];
+  const types = ['All', ...new Set(conferences.map(c => c.type))];
+
+  // Filter conferences based on selected filters and search term
+  const filteredConferences = conferences.filter(conf => {
+    const matchesCategory = selectedCategory === 'All' || conf.category === selectedCategory;
+    const matchesType = selectedType === 'All' || conf.type === selectedType;
+    const matchesSearch = conf.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         conf.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         conf.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         conf.features.some(feature => feature.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesCategory && matchesType && matchesSearch;
+  });
+
+  // Get count for each category
+  const getCategoryCount = (category) => {
+    if (category === 'All') return conferences.length;
+    return conferences.filter(c => c.category === category).length;
+  };
+
+  // Get count for each type
+  const getTypeCount = (type) => {
+    if (type === 'All') return conferences.length;
+    return conferences.filter(c => c.type === type).length;
+  };
+
+  // Check if any filter is active
+  const isFilterActive = selectedCategory !== 'All' || selectedType !== 'All' || searchTerm !== '';
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSelectedCategory('All');
+    setSelectedType('All');
+    setSearchTerm('');
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -191,43 +232,171 @@ const Conferences = () => {
           </div>
         </div>
 
-        {/* Conferences Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {conferences.map((conf, index) => (
-            <motion.a
-              key={index}
-              href={conf.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="block p-6 bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all group"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition">
-                  <FaMicrophone className="text-2xl text-indigo-600" />
-                </div>
-                <FaExternalLinkAlt className="text-gray-400 group-hover:text-indigo-600 transition" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">{conf.title}</h3>
-              <p className="text-gray-600 mb-4 text-sm">{conf.description}</p>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {conf.features.map((feature, i) => (
-                  <span key={i} className="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded-full">
-                    {feature}
-                  </span>
-                ))}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="inline-block px-3 py-1 bg-indigo-50 text-sm text-indigo-600 rounded-full">
-                  {conf.category}
-                </span>
-                <span className="text-xs text-gray-500">{conf.type}</span>
-              </div>
-            </motion.a>
-          ))}
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <input
+              type="text"
+              placeholder="Search conferences by title, description, or category..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
         </div>
+
+        {/* Filter Section */}
+        <div className="mb-6 space-y-4">
+          {/* Active Filters Indicator */}
+          {isFilterActive && (
+            <div className="flex items-center justify-between bg-indigo-50 p-3 rounded-lg">
+              <span className="text-sm text-indigo-700">
+                <span className="font-medium">Active Filters:</span>{' '}
+                {selectedCategory !== 'All' && `Category: ${selectedCategory} `}
+                {selectedType !== 'All' && `Type: ${selectedType} `}
+                {searchTerm !== '' && `Search: "${searchTerm}"`}
+              </span>
+              <button
+                onClick={clearAllFilters}
+                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+              >
+                Clear All
+              </button>
+            </div>
+          )}
+
+          {/* Type Filter */}
+          <div>
+            <div className="flex items-center mb-2">
+              <FaFilter className="text-gray-600 mr-2" />
+              <span className="text-gray-700 font-medium">Filter by Type:</span>
+              {selectedType !== 'All' && (
+                <button
+                  onClick={() => setSelectedType('All')}
+                  className="ml-3 text-sm text-indigo-600 hover:text-indigo-700"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {types.map(type => (
+                <button
+                  key={type}
+                  onClick={() => setSelectedType(type)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    selectedType === type
+                      ? 'bg-indigo-600 text-white shadow-md scale-105'
+                      : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {type} ({getTypeCount(type)})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Category Filter */}
+          <div>
+            <div className="flex items-center mb-2">
+              <FaFilter className="text-gray-600 mr-2" />
+              <span className="text-gray-700 font-medium">Filter by Category:</span>
+              {selectedCategory !== 'All' && (
+                <button
+                  onClick={() => setSelectedCategory('All')}
+                  className="ml-3 text-sm text-indigo-600 hover:text-indigo-700"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 bg-gray-50 rounded-lg">
+              {categories.map(category => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                    selectedCategory === category
+                      ? 'bg-blue-600 text-white shadow-md scale-105'
+                      : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {category} ({getCategoryCount(category)})
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Results Count */}
+        <div className="mb-4 text-sm text-gray-600">
+          Showing {filteredConferences.length} of {conferences.length} conferences
+        </div>
+
+        {/* Conferences Grid */}
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={selectedCategory + selectedType + searchTerm}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {filteredConferences.length > 0 ? (
+              filteredConferences.map((conf, index) => (
+                <motion.a
+                  key={index}
+                  href={conf.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ y: -5 }}
+                  className="block p-6 bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all group"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition">
+                      <FaMicrophone className="text-2xl text-indigo-600" />
+                    </div>
+                    <FaExternalLinkAlt className="text-gray-400 group-hover:text-indigo-600 transition" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">{conf.title}</h3>
+                  <p className="text-gray-600 mb-4 text-sm">{conf.description}</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {conf.features.map((feature, i) => (
+                      <span key={i} className="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded-full">
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="inline-block px-3 py-1 bg-indigo-50 text-sm text-indigo-600 rounded-full">
+                      {conf.category}
+                    </span>
+                    <span className="text-xs text-gray-500">{conf.type}</span>
+                  </div>
+                </motion.a>
+              ))
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="col-span-full text-center py-12"
+              >
+                <p className="text-gray-500 text-lg">No conferences found matching your criteria.</p>
+                <button
+                  onClick={clearAllFilters}
+                  className="mt-4 text-indigo-600 hover:text-indigo-700 font-medium"
+                >
+                  Clear all filters
+                </button>
+              </motion.div>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Tips Section */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">

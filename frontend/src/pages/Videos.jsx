@@ -1,8 +1,12 @@
-import React from 'react';
-import { FaExternalLinkAlt, FaYoutube, FaPlay, FaGraduationCap, FaChalkboardTeacher } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { FaExternalLinkAlt, FaYoutube, FaPlay, FaGraduationCap, FaChalkboardTeacher, FaSearch, FaFilter } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Videos = () => {
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedPlatform, setSelectedPlatform] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
+
   const videos = [
     {
       title: "Khan Academy",
@@ -150,8 +154,43 @@ const Videos = () => {
     }
   ];
 
-  const categories = [...new Set(videos.map(v => v.category))];
-  const platforms = [...new Set(videos.map(v => v.platform))];
+  // Get unique categories and platforms
+  const categories = ['All', ...new Set(videos.map(v => v.category))];
+  const platforms = ['All', ...new Set(videos.map(v => v.platform))];
+
+  // Filter videos based on selected filters and search term
+  const filteredVideos = videos.filter(video => {
+    const matchesCategory = selectedCategory === 'All' || video.category === selectedCategory;
+    const matchesPlatform = selectedPlatform === 'All' || video.platform === selectedPlatform;
+    const matchesSearch = video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         video.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         video.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         video.platform.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         video.features.some(feature => feature.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesCategory && matchesPlatform && matchesSearch;
+  });
+
+  // Get count for each category
+  const getCategoryCount = (category) => {
+    if (category === 'All') return videos.length;
+    return videos.filter(v => v.category === category).length;
+  };
+
+  // Get count for each platform
+  const getPlatformCount = (platform) => {
+    if (platform === 'All') return videos.length;
+    return videos.filter(v => v.platform === platform).length;
+  };
+
+  // Check if any filter is active
+  const isFilterActive = selectedCategory !== 'All' || selectedPlatform !== 'All' || searchTerm !== '';
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSelectedCategory('All');
+    setSelectedPlatform('All');
+    setSearchTerm('');
+  };
 
   return (
     <motion.div 
@@ -189,54 +228,194 @@ const Videos = () => {
           </div>
         </div>
 
-        {/* Videos Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {videos.map((video, index) => (
-            <motion.a
-              key={index}
-              href={video.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="block p-6 bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all group"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-lg transition ${
-                  video.platform === 'YouTube' 
-                    ? 'bg-red-100 group-hover:bg-red-200' 
-                    : video.platform === 'University'
-                    ? 'bg-blue-100 group-hover:bg-blue-200'
-                    : 'bg-green-100 group-hover:bg-green-200'
-                }`}>
-                  {video.platform === 'YouTube' 
-                    ? <FaYoutube className="text-2xl text-red-600" />
-                    : video.platform === 'University'
-                    ? <FaGraduationCap className="text-2xl text-blue-600" />
-                    : <FaPlay className="text-2xl text-green-600" />
-                  }
-                </div>
-                <FaExternalLinkAlt className="text-gray-400 group-hover:text-red-600 transition" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">{video.title}</h3>
-              <p className="text-gray-600 mb-4 text-sm">{video.description}</p>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {video.features.map((feature, i) => (
-                  <span key={i} className="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded-full">
-                    {feature}
-                  </span>
-                ))}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="inline-block px-3 py-1 bg-red-50 text-sm text-red-600 rounded-full">
-                  {video.category}
-                </span>
-                <span className="text-xs text-gray-500">{video.platform}</span>
-              </div>
-            </motion.a>
-          ))}
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <input
+              type="text"
+              placeholder="Search videos by title, description, or category..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
         </div>
+
+        {/* Filter Section */}
+        <div className="mb-6 space-y-4">
+          {/* Active Filters Indicator */}
+          {isFilterActive && (
+            <div className="flex items-center justify-between bg-red-50 p-3 rounded-lg">
+              <span className="text-sm text-red-700">
+                <span className="font-medium">Active Filters:</span>{' '}
+                {selectedCategory !== 'All' && `Category: ${selectedCategory} `}
+                {selectedPlatform !== 'All' && `Platform: ${selectedPlatform} `}
+                {searchTerm !== '' && `Search: "${searchTerm}"`}
+              </span>
+              <button
+                onClick={clearAllFilters}
+                className="text-sm text-red-600 hover:text-red-700 font-medium"
+              >
+                Clear All
+              </button>
+            </div>
+          )}
+
+          {/* Platform Filter */}
+          <div>
+            <div className="flex items-center mb-2">
+              <FaFilter className="text-gray-600 mr-2" />
+              <span className="text-gray-700 font-medium">Filter by Platform:</span>
+              {selectedPlatform !== 'All' && (
+                <button
+                  onClick={() => setSelectedPlatform('All')}
+                  className="ml-3 text-sm text-red-600 hover:text-red-700"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {platforms.map(platform => (
+                <button
+                  key={platform}
+                  onClick={() => setSelectedPlatform(platform)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    selectedPlatform === platform
+                      ? platform === 'YouTube'
+                        ? 'bg-red-600 text-white shadow-md scale-105'
+                        : platform === 'University'
+                        ? 'bg-blue-600 text-white shadow-md scale-105'
+                        : 'bg-green-600 text-white shadow-md scale-105'
+                      : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {platform} ({getPlatformCount(platform)})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Category Filter */}
+          <div>
+            <div className="flex items-center mb-2">
+              <FaFilter className="text-gray-600 mr-2" />
+              <span className="text-gray-700 font-medium">Filter by Category:</span>
+              {selectedCategory !== 'All' && (
+                <button
+                  onClick={() => setSelectedCategory('All')}
+                  className="ml-3 text-sm text-red-600 hover:text-red-700"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 bg-gray-50 rounded-lg">
+              {categories.map(category => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                    selectedCategory === category
+                      ? 'bg-red-600 text-white shadow-md scale-105'
+                      : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {category} ({getCategoryCount(category)})
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Results Count */}
+        <div className="mb-4 text-sm text-gray-600">
+          Showing {filteredVideos.length} of {videos.length} videos
+        </div>
+
+        {/* Videos Grid */}
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={selectedCategory + selectedPlatform + searchTerm}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {filteredVideos.length > 0 ? (
+              filteredVideos.map((video, index) => (
+                <motion.a
+                  key={index}
+                  href={video.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ y: -5 }}
+                  className="block p-6 bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all group"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`p-3 rounded-lg transition ${
+                      video.platform === 'YouTube' 
+                        ? 'bg-red-100 group-hover:bg-red-200' 
+                        : video.platform === 'University'
+                        ? 'bg-blue-100 group-hover:bg-blue-200'
+                        : 'bg-green-100 group-hover:bg-green-200'
+                    }`}>
+                      {video.platform === 'YouTube' 
+                        ? <FaYoutube className="text-2xl text-red-600" />
+                        : video.platform === 'University'
+                        ? <FaGraduationCap className="text-2xl text-blue-600" />
+                        : <FaPlay className="text-2xl text-green-600" />
+                      }
+                    </div>
+                    <FaExternalLinkAlt className="text-gray-400 group-hover:text-red-600 transition" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">{video.title}</h3>
+                  <p className="text-gray-600 mb-4 text-sm">{video.description}</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {video.features.map((feature, i) => (
+                      <span key={i} className="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded-full">
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="inline-block px-3 py-1 bg-red-50 text-sm text-red-600 rounded-full">
+                      {video.category}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      video.platform === 'YouTube'
+                        ? 'bg-red-100 text-red-600'
+                        : video.platform === 'University'
+                        ? 'bg-blue-100 text-blue-600'
+                        : 'bg-green-100 text-green-600'
+                    }`}>
+                      {video.platform}
+                    </span>
+                  </div>
+                </motion.a>
+              ))
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="col-span-full text-center py-12"
+              >
+                <p className="text-gray-500 text-lg">No videos found matching your criteria.</p>
+                <button
+                  onClick={clearAllFilters}
+                  className="mt-4 text-red-600 hover:text-red-700 font-medium"
+                >
+                  Clear all filters
+                </button>
+              </motion.div>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Learning Tips */}
         <div className="mt-12 p-6 bg-gradient-to-r from-yellow-50 to-red-50 rounded-xl">
