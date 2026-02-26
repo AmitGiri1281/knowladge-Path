@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaClock, FaPaperPlane, FaGithub, FaTwitter, FaLinkedin } from 'react-icons/fa';
-import emailjs from '@emailjs/browser';
-
-// Initialize EmailJS with your public key
-// You'll get this from your EmailJS dashboard
-emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your actual public key
+import api from '../services/api';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -30,20 +26,8 @@ const ContactPage = () => {
     setSubmitStatus(null);
 
     try {
-      // Replace these with your actual EmailJS credentials
-      const serviceId = 'YOUR_SERVICE_ID'; // Get from EmailJS dashboard
-      const templateId = 'YOUR_TEMPLATE_ID'; // Get from EmailJS dashboard
-      
-      const templateParams = {
-        from_name: formData.name,
-        from_email: formData.email,
-        subject: formData.subject,
-        message: formData.message,
-        to_name: 'Knowledge PathWay Team'
-      };
-
-      await emailjs.send(serviceId, templateId, templateParams);
-      
+      // You'll need to create this endpoint on your backend
+      await api.post('/contact', formData);
       setSubmitStatus('success');
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
@@ -147,7 +131,7 @@ const ContactPage = () => {
               
               {submitStatus === 'error' && (
                 <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
-                  There was an error sending your message. Please try again or email us directly at support@knowledgepathway.com
+                  There was an error sending your message. Please try again.
                 </div>
               )}
 
