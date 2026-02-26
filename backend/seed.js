@@ -29,9 +29,9 @@ const seedDatabase = async () => {
         order: 2
       },
       {
-        name: 'Religion',
-        description: 'Study world religions and spiritual traditions',
-        icon: '🕉',
+        name: 'Library and Information Science',
+        description: 'Study world ',
+        icon: '',
         color: 'red',
         order: 3
       },

@@ -32,13 +32,14 @@ const AboutPage = () => {
           >
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Our Mission</h2>
             <p className="text-lg text-gray-600 mb-4">
-              Knowledge PathWay was founded with a simple yet powerful mission: to democratize education 
-              and make quality learning materials accessible to everyone, anywhere, at any time.
+              
+KnowledgePath is a unified resource discovery platform designed to support UG, PG, PhD scholars, and faculty members in their academic journey. It integrates scholarly resources indexed on the Pandit Deendayal Upadhyaya Central Library, Central University of Haryana website, offering streamlined access to trusted academic materials through a single interface.
+The platform is being further enhanced with a proposed federated search engine, which will enable researchers to discover Indian journals along with citation details—similar to established indexing and abstracting databases.
+KnowledgePath aims to make academic exploration structured, efficient, and researcher-friendly.
+
             </p>
             <p className="text-lg text-gray-600 mb-6">
-              We believe that knowledge should not be confined by geographical boundaries, economic 
-              barriers, or institutional limitations. Our platform brings together diverse educational 
-              resources from around the world, curated and organized to create meaningful learning paths.
+              
             </p>
             <div className="flex space-x-4">
               <div className="flex items-center space-x-2">

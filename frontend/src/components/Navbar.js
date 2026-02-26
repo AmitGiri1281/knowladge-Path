@@ -45,8 +45,9 @@ const useDebounce = (value, delay) => {
 };
 
 // Sub-component for Resources Menu
-const ResourcesMenu = ({ onClose }) => {
-  const resources = [
+const ResourcesMenu = ({ onClose, dynamicResources = null }) => {
+
+  const staticResources = [
     { name: "Books", path: "/resources/books", icon: "📚" },
     { name: "Journals", path: "/resources/journals", icon: "📓" },
     { name: "Newspapers & Magazines", path: "/resources/news", icon: "📰" },
@@ -54,6 +55,8 @@ const ResourcesMenu = ({ onClose }) => {
     { name: "Conferences", path: "/resources/conferences", icon: "🎤" },
     { name: "Videos", path: "/resources/videos", icon: "🎥" },
   ];
+
+  const resources = dynamicResources || staticResources;
 
   return (
     <motion.div
@@ -144,7 +147,7 @@ const MegaMenu = ({ categories, sections, onClose }) => {
     const icons = {
       'Computer Science': '💻',
       'Philosophy': '🧠',
-      'Religion': '🕉',
+      'Library and Information Science': '',
       'Social Science': '🌍',
       'Language': '🌐',
       'Science': '🔬',
@@ -502,7 +505,7 @@ const Navbar = () => {
     const icons = {
       'Computer Science': '💻',
       'Philosophy': '🧠',
-      'Religion': '🕉',
+      'Library and Information Science': '',
       'Social Science': '🌍',
       'Language': '🌐',
       'Science': '🔬',

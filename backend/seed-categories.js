@@ -31,9 +31,9 @@ async function seedDatabase() {
         order: 2 
       },
       { 
-        name: 'Religion', 
-        description: 'Study world religions, spiritual traditions, and beliefs', 
-        icon: '🕉', 
+        name: 'Library and Information science', 
+        description: 'study material', 
+        icon: '', 
         color: 'red',
         order: 3 
       },
@@ -108,14 +108,34 @@ async function seedDatabase() {
       { categoryId: categories[1]._id, name: 'Logic', description: 'Master logical reasoning', order: 3 }
     ]);
 
-    // Create sections for Religion
-    console.log('📝 Creating sections for Religion...');
-    const religionSections = await Section.insertMany([
-      { categoryId: categories[2]._id, name: 'Hinduism', description: 'Explore Hindu philosophy and practices', order: 1 },
-      { categoryId: categories[2]._id, name: 'Buddhism', description: 'Learn Buddhist teachings', order: 2 },
-      { categoryId: categories[2]._id, name: 'Islam', description: 'Study Islamic traditions', order: 3 },
-      { categoryId: categories[2]._id, name: 'Christianity', description: 'Understand Christian beliefs', order: 4 }
-    ]);
+console.log('📝 Creating Library Science sections...');
+
+const librarySections = await Section.insertMany([
+  {
+    categoryId: categories[2]._id,
+    name: 'Library Books',
+    description: 'Explore library science books',
+    order: 1
+  },
+  {
+    categoryId: categories[2]._id,
+    name: 'Research Journals',
+    description: 'Academic LIS journals',
+    order: 2
+  },
+  {
+    categoryId: categories[2]._id,
+    name: 'Digital Libraries',
+    description: 'Modern information systems',
+    order: 3
+  },
+  {
+    categoryId: categories[2]._id,
+    name: 'Knowledge Management',
+    description: 'Information organization & retrieval',
+    order: 4
+  }
+]);
 
     // Create sections for Social Science
     console.log('📝 Creating sections for Social Science...');

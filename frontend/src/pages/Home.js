@@ -2721,7 +2721,7 @@ const backgroundImages = {
   // Category backgrounds
   computerScience: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   philosophy: 'https://images.unsplash.com/photo-1621351183012-e2f9972dd9bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-  religion: 'https://images.unsplash.com/photo-1485081669829-bacb8c7bb1f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+  LibraryandInformationScience: 'https://images.unsplash.com/photo-1485081669829-bacb8c7bb1f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   socialScience: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   language: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   science: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
@@ -2753,7 +2753,7 @@ const backgroundImages = {
 const categoryGradients = {
   'Computer Science': 'from-blue-600 to-cyan-600',
   'Philosophy': 'from-purple-600 to-pink-600',
-  'Religion': 'from-red-600 to-orange-600',
+  'Library and Information Science': 'from-red-600 to-orange-600',
   'Social Science': 'from-green-600 to-emerald-600',
   'Language': 'from-yellow-600 to-amber-600',
   'Science': 'from-indigo-600 to-blue-600',
@@ -2973,7 +2973,7 @@ const Home = () => {
     const bgMap = {
       'Computer Science': backgroundImages.computerScience,
       'Philosophy': backgroundImages.philosophy,
-      'Religion': backgroundImages.religion,
+      'Library and Information Science': backgroundImages.religion,
       'Social Science': backgroundImages.socialScience,
       'Language': backgroundImages.language,
       'Science': backgroundImages.science,
@@ -2993,7 +2993,7 @@ const Home = () => {
     const details = {
       'Computer Science': { icon: <FaLaptop />, color: 'from-blue-500 to-cyan-500', bg: 'bg-blue-50', text: 'text-blue-600', iconBg: 'bg-blue-100' },
       'Philosophy': { icon: <FaBrain />, color: 'from-purple-500 to-pink-500', bg: 'bg-purple-50', text: 'text-purple-600', iconBg: 'bg-purple-100' },
-      'Religion': { icon: <FaChurch />, color: 'from-red-500 to-orange-500', bg: 'bg-red-50', text: 'text-red-600', iconBg: 'bg-red-100' },
+      'Library and Information Science': { icon: <FaChurch />, color: 'from-red-500 to-orange-500', bg: 'bg-red-50', text: 'text-red-600', iconBg: 'bg-red-100' },
       'Social Science': { icon: <FaUniversity />, color: 'from-green-500 to-emerald-500', bg: 'bg-green-50', text: 'text-green-600', iconBg: 'bg-green-100' },
       'Language': { icon: <FaLanguage />, color: 'from-yellow-500 to-amber-500', bg: 'bg-yellow-50', text: 'text-yellow-600', iconBg: 'bg-yellow-100' },
       'Science': { icon: <FaFlask />, color: 'from-indigo-500 to-blue-500', bg: 'bg-indigo-50', text: 'text-indigo-600', iconBg: 'bg-indigo-100' },

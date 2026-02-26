@@ -11,7 +11,7 @@ import api from '../services/api';
 const iconMap = {
   'Computer Science': FaLaptop,
   'Philosophy': FaBrain,
-  'Religion': FaChurch,
+  'Library and Information Science': FaChurch,
   'Social Science': FaUniversity,
   'Language': FaLanguage,
   'Science': FaFlask,

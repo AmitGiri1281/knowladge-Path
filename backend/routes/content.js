@@ -76,6 +76,38 @@ router.get('/test', async (req, res) => {
  * GET /api/content/recent
  * Get most recent content - SAFE VERSION
  */
+
+/**
+ * GET /api/content/resources
+ * Get all resource sections dynamically
+ */
+router.get('/resources', async (req, res) => {
+  try {
+    console.log('📚 Fetching resources...');
+
+    // Find Resources category
+    const resourcesCategory = await Category.findOne({ name: 'Resources' }).lean();
+
+    if (!resourcesCategory) {
+      return res.json([]);
+    }
+
+    // Fetch sections under Resources
+    const sections = await Section.find({
+      categoryId: resourcesCategory._id
+    })
+    .sort({ order: 1 })
+    .lean();
+
+    res.json(sections);
+
+  } catch (error) {
+    console.error('❌ Resources error:', error);
+    res.json([]);
+  }
+});
+
+
 router.get('/recent', async (req, res) => {
   console.log('📥 [recent] Fetching recent content...');
   
