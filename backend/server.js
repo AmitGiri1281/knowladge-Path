@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-
+const contactRoutes = require('./routes/contactRoutes');
 dotenv.config();
 
 const app = express();
@@ -38,7 +38,7 @@ app.use('/api/sections', require('./routes/sections'));
 app.use('/api/content', require('./routes/content'));
 app.use('/api/chatbot', require('./routes/chatbot'));
 app.use('/api/auth', require('./routes/auth'));
-
+app.use('/api', contactRoutes);
 // Error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);

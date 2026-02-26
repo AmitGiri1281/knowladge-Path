@@ -17,7 +17,10 @@ import {
   FaSignInAlt,
   FaCog,
   FaExclamationTriangle,
-  FaSpinner
+  FaSpinner,
+  FaInfoCircle,
+  FaBullseye,
+  FaEnvelope
 } from 'react-icons/fa';
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -82,6 +85,53 @@ const ResourcesMenu = ({ onClose }) => {
         <div className="flex items-center space-x-2">
           <FaBook className="text-sm" aria-hidden="true" />
           <span className="text-xs">External reference links only</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Sub-component for About Menu (New)
+const AboutMenu = ({ onClose }) => {
+  const aboutItems = [
+    { name: "About Us", path: "/about", icon: "ℹ️", description: "Learn about our mission" },
+    { name: "Aims & Goals", path: "/aims", icon: "🎯", description: "Our objectives and vision" },
+    { name: "Contact Us", path: "/contact", icon: "📧", description: "Get in touch with us" },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
+      transition={{ duration: 0.2 }}
+      className="absolute mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden"
+      role="menu"
+      aria-label="About menu"
+    >
+      <div className="py-2">
+        {aboutItems.map((item) => (
+          <Link
+            key={item.name}
+            to={item.path}
+            className="flex items-start space-x-3 px-4 py-3 hover:bg-blue-50 text-gray-700 hover:text-blue-600 transition group"
+            onClick={onClose}
+            role="menuitem"
+          >
+            <span className="text-xl" aria-hidden="true">{item.icon}</span>
+            <div className="flex-1">
+              <span className="font-medium block">{item.name}</span>
+              <span className="text-xs text-gray-500 group-hover:text-blue-500">{item.description}</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+      
+      {/* About Footer */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 text-white">
+        <div className="flex items-center space-x-2">
+          <FaInfoCircle className="text-sm" aria-hidden="true" />
+          <span className="text-xs">Empowering knowledge seekers worldwide</span>
         </div>
       </div>
     </motion.div>
@@ -302,6 +352,7 @@ const Navbar = () => {
   const [showMegaMenu, setShowMegaMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showResources, setShowResources] = useState(false);
+  const [showAboutMenu, setShowAboutMenu] = useState(false); // New state for About menu
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -312,6 +363,7 @@ const Navbar = () => {
   const userMenuRef = useRef(null);
   const searchRef = useRef(null);
   const resourcesRef = useRef(null);
+  const aboutMenuRef = useRef(null); // New ref for About menu
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -333,6 +385,9 @@ const Navbar = () => {
       if (resourcesRef.current && !resourcesRef.current.contains(event.target)) {
         setShowResources(false);
       }
+      if (aboutMenuRef.current && !aboutMenuRef.current.contains(event.target)) {
+        setShowAboutMenu(false);
+      }
     };
 
     const handleEscape = (event) => {
@@ -341,6 +396,7 @@ const Navbar = () => {
         setShowUserMenu(false);
         setShowSearchResults(false);
         setShowResources(false);
+        setShowAboutMenu(false);
         setIsOpen(false);
       }
     };
@@ -517,6 +573,29 @@ const Navbar = () => {
               </AnimatePresence>
             </div>
 
+            {/* About Menu (New) */}
+            <div className="relative" ref={aboutMenuRef}>
+              <button
+                onClick={() => setShowAboutMenu(!showAboutMenu)}
+                className="flex items-center space-x-1 px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition group focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-expanded={showAboutMenu}
+                aria-haspopup="true"
+                aria-label="About menu"
+              >
+                <span className="font-medium">About</span>
+                <FaChevronDown
+                  className={`text-sm transition-transform duration-200 ${showAboutMenu ? 'rotate-180' : ''}`}
+                  aria-hidden="true"
+                />
+              </button>
+
+              <AnimatePresence>
+                {showAboutMenu && (
+                  <AboutMenu onClose={() => setShowAboutMenu(false)} />
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Resources Dropdown */}
             <div className="relative" ref={resourcesRef}>
               <button
@@ -689,6 +768,49 @@ const Navbar = () => {
                     />
                     <FaSearch className="absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400" aria-hidden="true" />
                   </form>
+
+                  {/* Mobile About Section (New) */}
+                  <div className="space-y-2 px-4">
+                    <div className="font-semibold text-gray-800 flex items-center space-x-2">
+                      <FaInfoCircle className="text-blue-600" />
+                      <span>About</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
+                      <Link
+                        to="/about"
+                        className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg text-gray-700 hover:bg-blue-50 transition"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span className="text-xl">ℹ️</span>
+                        <div>
+                          <div className="font-medium">About Us</div>
+                          <div className="text-xs text-gray-500">Learn about our mission</div>
+                        </div>
+                      </Link>
+                      <Link
+                        to="/aims"
+                        className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg text-gray-700 hover:bg-blue-50 transition"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span className="text-xl">🎯</span>
+                        <div>
+                          <div className="font-medium">Aims & Goals</div>
+                          <div className="text-xs text-gray-500">Our objectives and vision</div>
+                        </div>
+                      </Link>
+                      <Link
+                        to="/contact"
+                        className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg text-gray-700 hover:bg-blue-50 transition"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span className="text-xl">📧</span>
+                        <div>
+                          <div className="font-medium">Contact Us</div>
+                          <div className="text-xs text-gray-500">Get in touch with us</div>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
 
                   {/* Mobile Categories */}
                   <div className="space-y-2 px-4">

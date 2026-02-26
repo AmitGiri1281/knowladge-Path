@@ -19,13 +19,18 @@ import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 // Import Resource Pages
-import Resources from './pages/Resources';  // Add this import
+import Resources from './pages/Resources';
 import Books from './pages/Books';
 import Journals from './pages/Journals';
 import NewsMagazines from './pages/NewsMagazines';
 import Workshops from './pages/Workshops';
 import Conferences from './pages/Conferences';
 import Videos from './pages/Videos';
+
+// Import About Pages (Add these imports)
+import AboutPage from './pages/AboutPage';
+import AimsPage from './pages/AimsPage';
+import ContactPage from './pages/ContactPage';
 
 function App() {
   return (
@@ -45,8 +50,13 @@ function App() {
               <Route path="/recent" element={<RecentPage />} />
               <Route path="/popular" element={<PopularPage />} />
               
-              {/* Resource Routes - Add the main route first */}
-              <Route path="/resources" element={<Resources />} />  {/* Add this line */}
+              {/* About Routes - Add these new routes */}
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/aims" element={<AimsPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              
+              {/* Resource Routes */}
+              <Route path="/resources" element={<Resources />} />
               <Route path="/resources/books" element={<Books />} />
               <Route path="/resources/journals" element={<Journals />} />
               <Route path="/resources/news" element={<NewsMagazines />} />
@@ -70,6 +80,17 @@ function App() {
                 <ProtectedRoute>
                   <AdminPage />
                 </ProtectedRoute>
+              } />
+              
+              {/* Optional: Add a 404 route for any undefined paths */}
+              <Route path="*" element={
+                <div className="min-h-screen flex items-center justify-center">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
+                    <p className="text-xl text-gray-600 mb-8">Page not found</p>
+                    <a href="/" className="text-blue-600 hover:text-blue-700 underline">Go back home</a>
+                  </div>
+                </div>
               } />
             </Routes>
           </main>
