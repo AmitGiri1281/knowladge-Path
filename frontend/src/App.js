@@ -16,6 +16,10 @@ import AdminPage from './pages/AdminPage';
 import Chatbot from './components/Chatbot';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import BooksPage from './pages/resources/BooksPage';
+import JobsPage from './pages/resources/JobsPage';
+import JournalsPage from './pages/resources/JournalsPage';
+import ConferencesPage from './pages/resources/ConferencesPage';
 import './App.css';
 
 // Import Resource Pages
@@ -67,6 +71,11 @@ function App() {
               {/* Auth Routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+
+              <Route path="/resources/books" element={<BooksPage />} />
+<Route path="/resources/journals" element={<JournalsPage />} />
+<Route path="/resources/conferences" element={<ConferencesPage />} />
+<Route path="/resources/jobs" element={<JobsPage />} />
               
               {/* Protected Routes (Require Login) */}
               <Route path="/profile" element={
